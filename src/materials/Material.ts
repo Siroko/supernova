@@ -27,28 +27,6 @@ class Material {
     }
 
     private createBindGroupLayout(gpuDevice: GPUDevice) {
-        // const entries = [
-        //     {
-        //         binding: 0,
-        //         visibility: GPUShaderStage.FRAGMENT,
-        //         type: 'external-texture'
-        //     },
-        //     {
-        //         binding: 1,
-        //         visibility: GPUShaderStage.FRAGMENT,
-        //         type: 'texture-2d-array'
-        //     },
-        //     {
-        //         binding: 2,
-        //         visibility: GPUShaderStage.FRAGMENT,
-        //         type: 'sampler'
-        //     },
-        //     {
-        //         binding: 3,
-        //         visibility: GPUShaderStage.FRAGMENT,
-        //         type: 'uniform-buffer'
-        //     }
-        // ]
         const entries = [];
         for (const uniform of this.uniforms) {
             if (uniform.value!.type) {
@@ -80,6 +58,7 @@ class Material {
         }
 
         const renderPipelineDescriptor: GPURenderPipelineDescriptor = {
+            layout: "auto",
             vertex: {
                 module: this.shaderRenderModule,
                 entryPoint: 'vertex_main',
@@ -96,8 +75,7 @@ class Material {
             } as GPUFragmentState,
             primitive: {
                 topology: 'triangle-list',
-            } as GPUPrimitiveState,
-            layout: "auto"
+            } as GPUPrimitiveState
         }
         this.pipeline = gpuDevice.createRenderPipeline(renderPipelineDescriptor);
 
