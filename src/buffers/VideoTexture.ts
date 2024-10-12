@@ -4,7 +4,7 @@ class VideoTexture implements IBindable {
     type: string = 'external-texture';
     private gpuDevice?: GPUDevice;
     public initialized: boolean = false;
-    private externalTexture?: GPUExternalTexture;
+
 
     constructor(
         private videoElement: HTMLVideoElement
@@ -15,7 +15,6 @@ class VideoTexture implements IBindable {
     }
     async initialize(gpuDevice: GPUDevice): Promise<void> {
         this.gpuDevice = gpuDevice;
-        this.externalTexture = await gpuDevice.importExternalTexture({ source: this.videoElement! });
         this.initialized = true;
     }
 
