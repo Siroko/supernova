@@ -25,8 +25,8 @@ fn rand(n: vec2<f32>) -> f32 {
 @fragment
 fn fragment_main(fragData: VertexOut) -> @location(0) vec4<f32>
 {
-    var cols: f32 = 100.0;
-    var rows: f32 = 50.0;
+    var cols: f32 = 120.0;
+    var rows: f32 = 60.0;
 
     var uv:vec2<f32> = vec2<f32>(fragData.position.xy / vec2<f32>(res.z, res.w));
 
@@ -45,7 +45,7 @@ fn fragment_main(fragData: VertexOut) -> @location(0) vec4<f32>
     var colsInMap: f32 = 10.0;
     var rowsInMap: f32 = 10.0;
     var discreteLuminance:f32 = floor(luminance * colsInMap) / colsInMap;
-    discreteLuminance = clamp(0.0, 0.999, ((discreteLuminance - 0.5) * 4.0) + 0.5);
+    discreteLuminance = clamp(0.0, 1.0, ((discreteLuminance - 0.5)) + 0.5);
 
     var jitter: f32 = floor(rand(discreteUv) * rowsInMap) / rowsInMap;
     var gridCoords: vec2<f32> = vec2<f32>(gridUv.x / colsInMap + discreteLuminance, gridUv.y / rowsInMap + jitter);
