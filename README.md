@@ -15,13 +15,20 @@ An open-source 3D engine for WebGPU.
 ## Installation
 
 ```bash
-npm install supernova
+npm install @siroko/supernova
 ```
 
 ## Basic Usage
 
 ```javascript
-import { Renderer, Scene, Camera, Mesh, Geometry, Material } from 'supernova';
+import {
+  Renderer,
+  Scene,
+  Camera,
+  Mesh,
+  Geometry,
+  Material,
+} from '@siroko/supernova';
 
 const renderer = new Renderer();
 await renderer.initialize();
