@@ -1,6 +1,6 @@
 {
   "name": "supernova",
-  "private": true,
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "gl-matrix": "^3.4.3"
@@ -40,5 +41,10 @@
   },
   "dependencies": {
     "@webgpu/types": "^0.1.48"
-  }
+  },
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist"
+  ]
 }
