@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Example WebGPU Renderer</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import { Renderer } from '../src/renderers/Renderer'
+      import { Texture } from '../src/buffers/Texture'
+      import { Sampler } from '../src/buffers/Sampler'
+      import { shaderCode } from './assets/shaders/FullQuadAsciiShader'
+      import { Material } from '../src/materials/Material'
+      import { Geometry } from '../src/buffers/Geometry'
+      import { Mesh } from '../src/objects/Mesh'
+      import { Scene } from '../src/objects/Scene'
+      import { Camera } from '../src/cameras/Camera'
+      import { VideoTexture } from '../src/buffers/VideoTexture'
+      import { Vector4 } from '../src/buffers/Vector4'
+      import { TextureLoader } from '../src/loaders/TextureLoader'
+
+      const videoTag = document.createElement('video')
+      const mediaDevices = navigator.mediaDevices;
+      videoTag.muted = true;
+      
+      document.body.addEventListener("click", async () => {
+        
+        // Accessing the user camera and video.
+        mediaDevices.getUserMedia({
+          video: { width: 1920, height: 1080 },
+          audio: true,
+        }).then((stream) => {
+          // Changing the source of video to current stream.
+          videoTag.srcObject = stream;
+          videoTag.addEventListener("loadedmetadata", () => {
+            videoTag.play();
+            document.body.appendChild(videoTag);
+            animate();
+          });
+        });
+      });
+
+      const renderer = new Renderer({
+        alphaMode: "premultiplied"
+      });
+      await renderer.initialize();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement)
+
+      const camera = new Camera();
+      const tl = new TextureLoader();
+      const imageBitmap = await tl.load("./assets/textures/character_sheet_without_black.jpg");
+      const texture = new Texture(imageBitmap);
+      const sampler = new Sampler('linear', 'linear');
+      const videoTexture = new VideoTexture(videoTag);
+      const resolution = new Vector4(1920, 1080, window.innerWidth, window.innerHeight);
+      const material = new Material(shaderCode, [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.FRAGMENT,
+          value: videoTexture
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.FRAGMENT,
+          value: texture
+        },
+        {
+          binding: 2,
+          visibility: GPUShaderStage.FRAGMENT,
+          value: sampler
+        },
+        {
+          binding: 3,
+          visibility: GPUShaderStage.FRAGMENT,
+          value: resolution
+        }
+      ]);
+      
+      const geometry = new Geometry();
+      const mesh = new Mesh(geometry, material);
+      const scene = new Scene();
+      scene.add(mesh);
+
+      function animate() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      
+    </script>
+  </body>
+</html>
