@@ -1,4 +1,5 @@
 import { Camera } from "../cameras/Camera";
+import { Compute } from "../materials/Compute";
 import { Mesh } from "../objects/Mesh";
 import { Object3D } from "../objects/Object3D";
 import { Scene } from "../objects/Scene";
@@ -45,7 +46,7 @@ class Renderer {
                 this.context?.configure({
                     device: this.device,
                     format: this.presentationFormat,
-                    alphaMode: this.options.alphaMode || "opaque",
+                    alphaMode: this.options?.alphaMode || "opaque",
                 });
             }
         }
@@ -107,6 +108,21 @@ class Renderer {
                 this.renderObject(child, camera);
             }
         }
+    }
+
+    public async compute(compute: Compute, workgroupsX: number = 64, workgroupsY: number = 1, workgroupsZ: number = 1): Promise<void> {
+        const commandEncoder = this.device!.createCommandEncoder();
+        const passEncoder = commandEncoder.beginComputePass();
+        if (!compute.initialized) await compute.initialize(this.device!);
+        const bindGroup = await compute.getBindGroup(this.device!, 0);
+        passEncoder.setBindGroup(0, bindGroup);
+        passEncoder.setPipeline(compute.pipeline!);
+        passEncoder.dispatchWorkgroups(workgroupsX, workgroupsY, workgroupsZ);
+        passEncoder.end();
+        const commands = commandEncoder.finish();
+        this.device!.queue.submit([commands]);
+
+        return Promise.resolve();
     }
 }
 

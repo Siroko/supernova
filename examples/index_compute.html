@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Example WebGPU Renderer</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import { Renderer } from '../src/renderers/Renderer'
+      import { shaderCode } from './assets/shaders/ComputeShaderTest'
+      import { Compute } from '../src/materials/Compute'
+      import { ComputeBuffer } from '../src/buffers/ComputeBuffer'
+
+      const renderer = new Renderer();
+      await renderer.initialize();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      const computeBuffer = new ComputeBuffer();
+      computeBuffer.type = ComputeBuffer.BUFFER_TYPE_STORAGE;
+      computeBuffer.setBuffer(new Float32Array([1, 2, 3, 4]), GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
+      const compute = new Compute(shaderCode, [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.COMPUTE,
+          value: computeBuffer
+        }
+      ]);
+
+      await renderer.compute(compute);
+      
+    </script>
+  </body>
+</html>
