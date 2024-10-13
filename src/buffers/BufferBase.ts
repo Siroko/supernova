@@ -15,7 +15,6 @@ class BufferBase implements IBindable {
     protected buffer?: Float32Array;
 
     public initialize(gpuDevice: GPUDevice): void {
-        console.log("initializing compute buffer", this.buffer);
         this._resource = gpuDevice.createBuffer({
             mappedAtCreation: true,
             size: this.buffer!.byteLength,
