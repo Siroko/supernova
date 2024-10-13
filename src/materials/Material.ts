@@ -29,18 +29,38 @@ class Material {
     private createBindGroupLayout(gpuDevice: GPUDevice) {
         const entries = [];
         for (const uniform of this.uniforms) {
-            if (uniform.value!.type) {
-                entries.push({
-                    binding: uniform.binding!,
-                    visibility: uniform.visibility!,
-                    type: uniform.value!.type!
-                });
-            } else {
-                entries.push({
-                    binding: uniform.binding!,
-                    visibility: uniform.visibility!,
-                });
+            const entry: GPUBindGroupLayoutEntry = {
+                binding: uniform.binding!,
+                visibility: uniform.visibility!
+            };
+            switch (uniform.value!.type) {
+                case 'storage':
+                case 'read-only-storage':
+                case 'uniform':
+                    entry.buffer = {
+                        type: uniform.value!.type as GPUBufferBindingType
+                    };
+                    break;
+                case 'sampler':
+                    entry.sampler = { type: 'filtering' };
+                    break;
+                case 'texture':
+                    entry.texture = { sampleType: 'float' };
+                    break;
+                case 'storage-texture':
+                    entry.storageTexture = {
+                        access: 'write-only',
+                        format: 'rgba8unorm'
+                    };
+                    break;
+                case 'external-texture':
+                    entry.externalTexture = {};
+                    break;
+                default:
+                    console.error(`Unknown binding type: ${uniform.value!.type}`);
+                    continue;
             }
+            entries.push(entry);
         }
 
         this.bindGroupLayout = gpuDevice.createBindGroupLayout({

@@ -14,7 +14,7 @@ class Texture implements IBindable {
         this.uuid = crypto.randomUUID();
     }
 
-    type: string | undefined;
+    type: string = 'texture';
 
     public initialize(gpuDevice: GPUDevice): Promise<void> {
         this.texture = this.webGPUTextureFromImageBitmapOrCanvas(gpuDevice, this.imageBitmap);

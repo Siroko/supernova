@@ -2,7 +2,7 @@ import { IBindable } from "./IBindable";
 
 class BufferBase implements IBindable {
     public static BUFFER_TYPE_STORAGE: string = 'storage';
-    public static BUFFER_TYPE_UNIFORM: string = 'uniform-buffer';
+    public static BUFFER_TYPE_UNIFORM: string = 'uniform';
     public static BUFFER_TYPE_READ_ONLY_STORAGE: string = 'read-only-storage';
 
     public usage: GPUFlagsConstant = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;

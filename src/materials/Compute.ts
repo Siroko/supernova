@@ -86,7 +86,7 @@ class Compute {
             }
         }
         this.pipeline = gpuDevice.createComputePipeline(computePipelineDescriptor);
-        console.log(this.pipeline);
+
         this.initialized = true;
     }
 

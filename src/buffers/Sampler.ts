@@ -2,7 +2,7 @@ import { IBindable } from "./IBindable";
 
 class Sampler implements IBindable {
     sampler?: GPUBindingResource | undefined;
-    type?: string | undefined;
+    type: string = 'sampler';
     initialized: boolean = false;
 
     uuid: string;
