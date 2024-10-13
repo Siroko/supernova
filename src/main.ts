@@ -10,4 +10,7 @@ export { Vector4 } from "./buffers/Vector4";
 export { TextureLoader } from "./loaders/TextureLoader";
 export { Camera } from "./cameras/Camera";
 export { Sampler } from "./buffers/Sampler";
+export { Compute } from "./materials/Compute";
+export { ComputeBuffer } from "./buffers/ComputeBuffer";
+
 
