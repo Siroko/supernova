@@ -1,3 +1,4 @@
+import { ComputeBuffer } from "../buffers/ComputeBuffer";
 import { Camera } from "../cameras/Camera";
 import { Compute } from "../materials/Compute";
 import { Mesh } from "../objects/Mesh";
@@ -123,6 +124,38 @@ class Renderer {
         this.device!.queue.submit([commands]);
 
         return Promise.resolve();
+    }
+
+    public async readBackBuffer<T extends Float32Array | Uint32Array | Int32Array>(
+        buffer: ComputeBuffer,
+        ArrayType: new (buffer: ArrayBuffer) => T
+    ): Promise<T> {
+        const stagingBuffer = this.device!.createBuffer({
+            size: buffer.resource.buffer!.size,
+            usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
+        });
+
+        const commandEncoder = this.device!.createCommandEncoder();
+        commandEncoder.copyBufferToBuffer(
+            buffer.resource.buffer,
+            0, // Source offset
+            stagingBuffer,
+            0, // Destination offset
+            buffer.resource.buffer!.size
+        );
+
+        this.device!.queue.submit([commandEncoder.finish()]);
+
+        await stagingBuffer.mapAsync(
+            GPUMapMode.READ,
+            0, // Offset
+            buffer.resource.buffer!.size // Length
+        );
+        const copyArrayBuffer = stagingBuffer.getMappedRange(0, buffer.resource.buffer!.size);
+        const data = new ArrayType(copyArrayBuffer.slice(0));
+        stagingBuffer.unmap();
+
+        return data;
     }
 }
 

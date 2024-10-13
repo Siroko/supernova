@@ -24,9 +24,10 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      const computeBuffer = new ComputeBuffer();
+      const myBuffer = new Float32Array([1, 2, 3, 4]);
+      const computeBuffer = new ComputeBuffer(myBuffer);
       computeBuffer.type = ComputeBuffer.BUFFER_TYPE_STORAGE;
-      computeBuffer.setBuffer(new Float32Array([1, 2, 3, 4]), GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
+      computeBuffer.setBuffer(myBuffer, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
       const compute = new Compute(shaderCode, [
         {
           binding: 0,
@@ -35,8 +36,10 @@
         }
       ]);
 
-      await renderer.compute(compute);
-      
+      await renderer.compute(compute, Math.ceil(myBuffer.length / 64));
+      console.log(myBuffer);
+      const data = await renderer.readBackBuffer(computeBuffer, Float32Array);
+      console.log(data);
     </script>
   </body>
 </html>

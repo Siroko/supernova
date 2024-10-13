@@ -12,7 +12,6 @@ class ComputeBuffer extends BufferBase {
         this.buffer = buffer;
         this.usage = usage;
     }
-
 }
 
 export { ComputeBuffer };

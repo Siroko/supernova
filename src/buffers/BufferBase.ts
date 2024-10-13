@@ -8,7 +8,7 @@ class BufferBase implements IBindable {
     public usage: GPUFlagsConstant = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
     public type?: string | undefined;
     public initialized: boolean = false;
-    get resource(): GPUBindingResource {
+    get resource(): GPUBufferBinding {
         return { buffer: this._resource! };
     }
     protected _resource?: GPUBuffer;
