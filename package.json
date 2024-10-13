@@ -1,7 +1,7 @@
 {
   "name": "@siroko/supernova",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
@@ -13,7 +13,8 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "gl-matrix": "^3.4.3"
+    "gl-matrix": "^3.4.3",
+    "@webgpu/types": "^0.1.48"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
@@ -38,9 +39,6 @@
       "eslint --fix"
     ],
     "**/*": "prettier --write --ignore-unknown"
-  },
-  "dependencies": {
-    "@webgpu/types": "^0.1.48"
   },
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
