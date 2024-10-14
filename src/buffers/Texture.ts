@@ -5,6 +5,7 @@ class Texture implements IBindable {
     public magFilter: GPUFilterMode = 'linear';
     public minFilter: GPUFilterMode = 'linear';
     public uuid: string;
+    type: string = 'texture';
 
     private texture?: GPUTexture;
 
@@ -13,8 +14,6 @@ class Texture implements IBindable {
     ) {
         this.uuid = crypto.randomUUID();
     }
-
-    type: string = 'texture';
 
     public initialize(gpuDevice: GPUDevice): Promise<void> {
         this.texture = this.webGPUTextureFromImageBitmapOrCanvas(gpuDevice, this.imageBitmap);
