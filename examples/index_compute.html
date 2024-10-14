@@ -25,9 +25,11 @@
       document.body.appendChild(renderer.domElement);
 
       const myBuffer = new Float32Array([1, 2, 3, 4]);
-      const computeBuffer = new ComputeBuffer();
-      computeBuffer.type = ComputeBuffer.BUFFER_TYPE_STORAGE;
-      computeBuffer.setBuffer(myBuffer, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
+      const computeBuffer = new ComputeBuffer({
+        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+        type: ComputeBuffer.BUFFER_TYPE_STORAGE,
+        buffer: myBuffer
+      });
       const compute = new Compute(shaderCode, [
         {
           binding: 0,
