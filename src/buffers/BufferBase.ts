@@ -8,6 +8,8 @@ class BufferBase implements IBindable {
     public usage: GPUFlagsConstant = GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST;
     public type?: string | undefined;
     public initialized: boolean = false;
+    public needsUpdate: boolean = false;
+
     get resource(): GPUBufferBinding {
         return { buffer: this._resource! };
     }
@@ -23,6 +25,13 @@ class BufferBase implements IBindable {
         new Float32Array(this._resource.getMappedRange()).set(this.buffer!);
 
         this._resource.unmap();
+    }
+
+    public update(): void {
+        if (this._resource) {
+            new Float32Array(this._resource.getMappedRange()).set(this.buffer!);
+            this._resource.unmap();
+        }
     }
 }
 

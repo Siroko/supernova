@@ -6,13 +6,17 @@ class Texture implements IBindable {
     public minFilter: GPUFilterMode = 'linear';
     public uuid: string;
     type: string = 'texture';
-
+    public needsUpdate: boolean = false;
     private texture?: GPUTexture;
 
     constructor(
         private imageBitmap: ImageBitmap
     ) {
         this.uuid = crypto.randomUUID();
+    }
+
+    public update(gpuDevice: GPUDevice): void {
+        console.log('updating Texture', gpuDevice);
     }
 
     public initialize(gpuDevice: GPUDevice): Promise<void> {

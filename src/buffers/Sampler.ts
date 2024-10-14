@@ -4,7 +4,7 @@ class Sampler implements IBindable {
     sampler?: GPUBindingResource | undefined;
     type: string = 'sampler';
     initialized: boolean = false;
-
+    needsUpdate: boolean = false;
     uuid: string;
 
     constructor(
@@ -15,7 +15,11 @@ class Sampler implements IBindable {
         this.uuid = crypto.randomUUID();
     }
 
-    initialize(gpuDevice: GPUDevice): void {
+    public update(gpuDevice: GPUDevice): void {
+        console.log('updating Sampler', gpuDevice);
+    }
+
+    public initialize(gpuDevice: GPUDevice): void {
         const sampler = gpuDevice.createSampler({
             magFilter: this.magFilter,
             minFilter: this.minFilter,

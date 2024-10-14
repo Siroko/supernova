@@ -95,7 +95,14 @@ class Material {
             } as GPUFragmentState,
             primitive: {
                 topology: 'triangle-list',
-            } as GPUPrimitiveState
+                cullMode: 'back',
+            } as GPUPrimitiveState,
+
+            depthStencil: {
+                depthWriteEnabled: true,
+                depthCompare: 'less',
+                format: 'depth24plus',
+            },
         }
         this.pipeline = gpuDevice.createRenderPipeline(renderPipelineDescriptor);
 
@@ -108,6 +115,10 @@ class Material {
         for (const uniform of this.uniforms) {
             if (!uniform.value?.initialized) {
                 await uniform.value?.initialize(gpuDevice);
+            }
+
+            if (uniform.value?.needsUpdate) {
+                await uniform.value?.update(gpuDevice);
             }
 
             entries.push({

@@ -19,7 +19,7 @@
       import { Sampler } from '../src/buffers/Sampler'
       import { shaderCode } from './assets/shaders/FullQuadAsciiShader'
       import { Material } from '../src/materials/Material'
-      import { Geometry } from '../src/buffers/Geometry'
+      import { BoxGeometry } from '../src/geometries/BoxGeometry'
       import { Mesh } from '../src/objects/Mesh'
       import { Scene } from '../src/objects/Scene'
       import { Camera } from '../src/cameras/Camera'
@@ -85,7 +85,7 @@
         }
       ]);
       
-      const geometry = new Geometry();
+      const geometry = new BoxGeometry(3, 3, 0);
       const mesh = new Mesh(geometry, material);
       const scene = new Scene();
       scene.add(mesh);

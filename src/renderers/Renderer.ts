@@ -16,6 +16,7 @@ class Renderer {
     public context: GPUCanvasContext | null;
     private device?: GPUDevice;
     private presentationFormat?: GPUTextureFormat;
+    private depthTexture?: GPUTexture;
 
     constructor(
         private options: RendererOptions
@@ -49,6 +50,12 @@ class Renderer {
                     format: this.presentationFormat,
                     alphaMode: this.options?.alphaMode || "opaque",
                 });
+
+                this.depthTexture = this.device.createTexture({
+                    size: [this.domElement.width, this.domElement.height],
+                    format: 'depth24plus',
+                    usage: GPUTextureUsage.RENDER_ATTACHMENT,
+                });
             }
         }
         return Promise.resolve();
@@ -57,34 +64,49 @@ class Renderer {
     public setSize(width: number, height: number) {
         this.domElement.width = width;
         this.domElement.height = height;
+
+        this.depthTexture?.destroy();
+        this.depthTexture = this.device!.createTexture({
+            size: [this.domElement.width, this.domElement.height],
+            format: 'depth24plus',
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        });
     }
 
-    public render(scene: Scene, camera: Camera) {
+    public async render(scene: Scene, camera: Camera) {
+        const commandRenderEncoder = this.device!.createCommandEncoder();
+        const textureView = this.context!.getCurrentTexture().createView();
+
+        const renderPassDescriptor = {
+            colorAttachments: [
+                {
+                    view: textureView,
+                    clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+                    loadOp: 'clear',
+                    storeOp: 'store',
+                },
+            ],
+            depthStencilAttachment: {
+                view: this.depthTexture!.createView(),
+                depthClearValue: 1.0,
+                depthLoadOp: 'clear',
+                depthStoreOp: 'store',
+            },
+        };
+
         for (const child of scene.children) {
-            this.renderObject(child, camera);
+            await this.renderObject(child, commandRenderEncoder, renderPassDescriptor as GPURenderPassDescriptor);
         }
+
+        this.device!.queue.submit([commandRenderEncoder!.finish()]);
     }
 
-    private async renderObject(object: Object3D, camera: Camera) {
-        camera.isMesh = false;
+    private async renderObject(object: Object3D, commandRenderEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor): Promise<void> {
+        const passRenderEncoder = commandRenderEncoder!.beginRenderPass(renderPassDescriptor);
         if (object.isMesh) {
-            const commandRenderEncoder = this.device!.createCommandEncoder();
-            const textureView = this.context!.getCurrentTexture().createView();
-
-            const renderPassDescriptor = {
-                colorAttachments: [
-                    {
-                        view: textureView,
-                        clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
-                        loadOp: 'clear',
-                        storeOp: 'store',
-                    },
-                ],
-            };
-
             const mesh = object as Mesh;
             if (!mesh.geometry.initialized) {
-                mesh.geometry.createVertexBuffer(this.device!);
+                mesh.geometry.initialize(this.device!);
             }
             if (!mesh.material.initialized) {
                 await mesh.material.initialize(this.device!, mesh.geometry.vertexBuffersDescriptors, this.presentationFormat!);
@@ -92,23 +114,24 @@ class Renderer {
 
             const bindGroup = await mesh.material.getBindGroup(this.device!, 0);
 
-            const passRenderEncoder = commandRenderEncoder!.beginRenderPass(renderPassDescriptor as GPURenderPassDescriptor);
             passRenderEncoder.setPipeline(mesh.material.pipeline!);
             passRenderEncoder.setVertexBuffer(0, mesh.geometry.vertexBuffer!);
+            passRenderEncoder.setIndexBuffer(mesh.geometry.indexBuffer!, 'uint16');
 
             passRenderEncoder!.setBindGroup(0, bindGroup);
-            passRenderEncoder!.draw(3);
-            passRenderEncoder!.end();
-
-            this.device!.queue.submit([commandRenderEncoder!.finish()]);
+            passRenderEncoder!.drawIndexed(mesh.geometry.vertexCount);
         }
 
         // Render children
         if (object.children.length > 0) {
             for (const child of object.children) {
-                this.renderObject(child, camera);
+                await this.renderObject(child, commandRenderEncoder, renderPassDescriptor);
             }
         }
+
+        passRenderEncoder!.end();
+
+        return Promise.resolve();
     }
 
     public async compute(compute: Compute, workgroupsX: number = 64, workgroupsY: number = 1, workgroupsZ: number = 1): Promise<void> {

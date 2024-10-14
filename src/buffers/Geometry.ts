@@ -1,26 +1,38 @@
 class Geometry {
     public vertexBuffer?: GPUBuffer;
+    public indexBuffer?: GPUBuffer;
     public vertexBuffersDescriptors: Iterable<GPUVertexBufferLayout | null> = [];
     public initialized: boolean = false;
 
-    private vertices: Float32Array = new Float32Array([
-        -3.0, -3.0, 0, 1, 1, 0, 0, 1,
-        -0.0, 3.0, 0, 1, 0, 1, 0, 1,
-        3.0, -3.0, 0, 1, 0, 0, 1, 1
-    ]);
+    public vertexCount: number = 0;
+
+    protected vertices?: Float32Array;
+    protected normals?: Float32Array;
+    protected uvs?: Float32Array;
+    protected indices?: Uint16Array;
 
     //TODO: Add vertices manually from outside
     constructor() {
     }
 
-    public createVertexBuffer(gpuDevice: GPUDevice) {
+    public initialize(gpuDevice: GPUDevice) {
         this.vertexBuffer = gpuDevice.createBuffer({
-            size: this.vertices.byteLength,
+            label: 'vertex buffer',
+            size: this.vertices!.byteLength,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
             mappedAtCreation: true
         });
-        new Float32Array(this.vertexBuffer.getMappedRange()).set(this.vertices);
+        new Float32Array(this.vertexBuffer.getMappedRange()).set(this.vertices!);
         this.vertexBuffer.unmap();
+
+        this.indexBuffer = gpuDevice.createBuffer({
+            label: 'index buffer',
+            size: this.indices!.byteLength,
+            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+            mappedAtCreation: true
+        });
+        new Uint16Array(this.indexBuffer.getMappedRange()).set(this.indices!);
+        this.indexBuffer.unmap();
 
         this.vertexBuffersDescriptors = [{
             attributes: [
@@ -28,14 +40,9 @@ class Geometry {
                     shaderLocation: 0 as GPUIndex32,
                     offset: 0 as GPUSize64,
                     format: "float32x4" as GPUVertexFormat
-                },
-                {
-                    shaderLocation: 1 as GPUIndex32,
-                    offset: 16 as GPUSize64,
-                    format: "float32x4" as GPUVertexFormat
                 }
             ] as Iterable<GPUVertexAttribute>,
-            arrayStride: 32 as GPUSize64,
+            arrayStride: 4 * 4 as GPUSize32,
             stepMode: "vertex" as GPUVertexStepMode
         }] as Iterable<GPUVertexBufferLayout | null>;
 
