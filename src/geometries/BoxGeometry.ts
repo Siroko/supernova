@@ -6,8 +6,6 @@ class BoxGeometry extends Geometry {
 
     private _indices: number[] = [];
     private _vertices: number[] = [];
-    private _normals: number[] = [];
-    private _uvs: number[] = [];
 
     // helper variables
 
@@ -25,8 +23,6 @@ class BoxGeometry extends Geometry {
         heightSegments = Math.floor(heightSegments);
         depthSegments = Math.floor(depthSegments);
 
-
-
         // build each side of the box geometry
 
         this.buildPlane(2, 1, 0, - 1, - 1, depth, height, width, depthSegments, heightSegments); // px
@@ -39,13 +35,7 @@ class BoxGeometry extends Geometry {
         this.vertexCount = this._indices.length;
 
         this.vertices = new Float32Array(this._vertices);
-        this.normals = new Float32Array(this._normals);
-        this.uvs = new Float32Array(this._uvs);
         this.indices = new Uint16Array(this._indices);
-
-        console.log(this.indices.length);
-        console.log(this.vertices.length / 4);
-        console.log(this.vertexCount);
     }
 
     private buildPlane(u: number, v: number, w: number, udir: number, vdir: number, width: number, height: number, depth: number, gridX: number, gridY: number) {
@@ -89,12 +79,12 @@ class BoxGeometry extends Geometry {
                 vector.setComponent(w, depth > 0 ? 1 : -1);
 
                 // now apply vector to normal buffer
-                this._normals.push(vector.x, vector.y, vector.z);
+                this._vertices.push(vector.x, vector.y, vector.z);
 
                 // uvs
 
-                this._uvs.push(ix / gridX);
-                this._uvs.push(1 - (iy / gridY));
+                this._vertices.push(ix / gridX);
+                this._vertices.push(1 - (iy / gridY));
 
                 // counters
 

@@ -1,13 +1,22 @@
 export const shaderCode = /* wgsl */`
 struct VertexOut {
-    @builtin(position) position : vec4<f32>
+    @builtin(position) position : vec4<f32>,
+    @location(1) normal : vec3<f32>,
+    @location(2) uv : vec2<f32>
+
 };
 
 @vertex
-fn vertex_main(@location(0) position: vec4<f32>) -> VertexOut
+fn vertex_main(
+    @location(0) position: vec4<f32>,
+    @location(1) normal : vec3<f32>,
+    @location(2) uv : vec2<f32>
+) -> VertexOut
 {
     var output : VertexOut;
     output.position = position;
+    output.normal = normal;
+    output.uv = uv;
     return output;
 } 
 
@@ -48,6 +57,7 @@ fn fragment_main(fragData: VertexOut) -> @location(0) vec4<f32>
     var gridCoords: vec2<f32> = vec2<f32>(gridUv.x / colsInMap + discreteLuminance, gridUv.y / rowsInMap + jitter);
     var asciiTable:vec4<f32> = textureSample(asciiMap, mySampler, gridCoords);
     // asciiTable *= videoColor;
+    // return asciiTable;
     return asciiTable;
     // return vec4<f32>(discreteLuminance * gridUv.x, discreteLuminance * gridUv.y, discreteLuminance, 1.0);
 } 

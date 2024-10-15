@@ -112,13 +112,14 @@ class Renderer {
                 await mesh.material.initialize(this.device!, mesh.geometry.vertexBuffersDescriptors, this.presentationFormat!);
             }
 
-            const bindGroup = await mesh.material.getBindGroup(this.device!, 0);
+            const bindGroups = await mesh.material.getBindGroups(this.device!);
 
             passRenderEncoder.setPipeline(mesh.material.pipeline!);
             passRenderEncoder.setVertexBuffer(0, mesh.geometry.vertexBuffer!);
             passRenderEncoder.setIndexBuffer(mesh.geometry.indexBuffer!, 'uint16');
-
-            passRenderEncoder!.setBindGroup(0, bindGroup);
+            for (let i = 0; i < bindGroups.length; i++) {
+                passRenderEncoder!.setBindGroup(i, bindGroups[i]);
+            }
             passRenderEncoder!.drawIndexed(mesh.geometry.vertexCount);
         }
 

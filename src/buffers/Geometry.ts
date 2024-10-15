@@ -6,12 +6,10 @@ class Geometry {
 
     public vertexCount: number = 0;
 
+    // Indexed vertices, normals, uvs
     protected vertices?: Float32Array;
-    protected normals?: Float32Array;
-    protected uvs?: Float32Array;
     protected indices?: Uint16Array;
 
-    //TODO: Add vertices manually from outside
     constructor() {
     }
 
@@ -40,9 +38,19 @@ class Geometry {
                     shaderLocation: 0 as GPUIndex32,
                     offset: 0 as GPUSize64,
                     format: "float32x4" as GPUVertexFormat
+                },
+                {
+                    shaderLocation: 1 as GPUIndex32,
+                    offset: 4 * 4 as GPUSize64,
+                    format: "float32x3" as GPUVertexFormat
+                },
+                {
+                    shaderLocation: 2 as GPUIndex32,
+                    offset: 4 * 4 + 4 * 3 as GPUSize64,
+                    format: "float32x2" as GPUVertexFormat
                 }
             ] as Iterable<GPUVertexAttribute>,
-            arrayStride: 4 * 4 as GPUSize32,
+            arrayStride: 4 * 4 + 4 * 3 + 4 * 2 as GPUSize32,
             stepMode: "vertex" as GPUVertexStepMode
         }] as Iterable<GPUVertexBufferLayout | null>;
 
