@@ -1,9 +1,10 @@
-import { mat4 } from "gl-matrix";
 import { Object3D } from "../objects/Object3D";
+import { UniformGroup } from "../materials/UniformGroup";
+import { Matrix4 } from "../math/Matrix4";
 
 class Camera extends Object3D {
-    public viewMatrix: mat4;
-    public projectionMatrix: mat4;
+    public viewMatrix: Matrix4;
+    public projectionMatrix: Matrix4;
 
     constructor(
         public fov: number = 75,
@@ -12,8 +13,35 @@ class Camera extends Object3D {
         public aspect: number = 1
     ) {
         super();
-        this.viewMatrix = mat4.create();
-        this.projectionMatrix = mat4.perspective(mat4.create(), this.fov, this.aspect, this.near, this.far);
+        this.viewMatrix = new Matrix4();
+        this.projectionMatrix = new Matrix4().perspective(this.fov, this.aspect, this.near, this.far);
+        this.setUniforms();
+    }
+
+    public updateProjectionMatrix() {
+        this.projectionMatrix.perspective(this.fov, this.aspect, this.near, this.far);
+    }
+
+    public updateViewMatrix() {
+        this.updateModelMatrix();
+        this.viewMatrix.invert(this.worldMatrix);
+    }
+
+    protected setUniforms() {
+        super.setUniforms();
+
+        this.uniformGroup = new UniformGroup([
+            {
+                binding: 0,
+                visibility: GPUShaderStage.VERTEX,
+                value: this.viewMatrix
+            },
+            {
+                binding: 1,
+                visibility: GPUShaderStage.VERTEX,
+                value: this.projectionMatrix
+            }
+        ]);
     }
 }
 

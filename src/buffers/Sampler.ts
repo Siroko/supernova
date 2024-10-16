@@ -15,8 +15,7 @@ class Sampler implements IBindable {
         this.uuid = crypto.randomUUID();
     }
 
-    public update(gpuDevice: GPUDevice): void {
-        console.log('updating Sampler', gpuDevice);
+    public async update(): Promise<void> {
     }
 
     public initialize(gpuDevice: GPUDevice): void {

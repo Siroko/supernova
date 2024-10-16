@@ -6,6 +6,17 @@ struct VertexOut {
 
 };
 
+@group(0) @binding(0) var externalTexture : texture_external;
+@group(0) @binding(1) var asciiMap : texture_2d<f32>;
+@group(0) @binding(2) var mySampler: sampler;
+@group(0) @binding(3) var<uniform> res:vec4<f32>;
+
+@group(1) @binding(0) var<uniform> modelMatrix:mat4x4<f32>;
+@group(1) @binding(1) var<uniform> worldMatrix:mat4x4<f32>;
+
+@group(2) @binding(0) var<uniform> viewMatrix:mat4x4<f32>;
+@group(2) @binding(1) var<uniform> projectionMatrix:mat4x4<f32>;
+
 @vertex
 fn vertex_main(
     @location(0) position: vec4<f32>,
@@ -14,16 +25,11 @@ fn vertex_main(
 ) -> VertexOut
 {
     var output : VertexOut;
-    output.position = position;
-    output.normal = normal;
+    output.position = projectionMatrix * viewMatrix * modelMatrix * position;
+    output.normal = (worldMatrix * vec4<f32>(normal, 1.0)).xyz;
     output.uv = uv;
     return output;
 } 
-
-@group(0) @binding(0) var externalTexture : texture_external;
-@group(0) @binding(1) var asciiMap : texture_2d<f32>;
-@group(0) @binding(2) var mySampler: sampler;
-@group(0) @binding(3) var<uniform> res:vec4<f32>;
 
 fn rand(n: vec2<f32>) -> f32 { 
     return fract(sin(dot(n, vec2<f32>(12.9898, 4.1414))) * 43758.5453);
@@ -58,7 +64,7 @@ fn fragment_main(fragData: VertexOut) -> @location(0) vec4<f32>
     var asciiTable:vec4<f32> = textureSample(asciiMap, mySampler, gridCoords);
     // asciiTable *= videoColor;
     // return asciiTable;
-    return asciiTable;
+    return vec4<f32>(fragData.uv, 0.0, 1.0);
     // return vec4<f32>(discreteLuminance * gridUv.x, discreteLuminance * gridUv.y, discreteLuminance, 1.0);
 } 
 `;

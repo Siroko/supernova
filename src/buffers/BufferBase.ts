@@ -16,6 +16,8 @@ class BufferBase implements IBindable {
     protected _resource?: GPUBuffer;
     protected buffer?: Float32Array;
 
+    private gpuDevice?: GPUDevice;
+
     public initialize(gpuDevice: GPUDevice): void {
         this._resource = gpuDevice.createBuffer({
             mappedAtCreation: true,
@@ -24,14 +26,17 @@ class BufferBase implements IBindable {
         });
         new Float32Array(this._resource.getMappedRange()).set(this.buffer!);
 
+        this.gpuDevice = gpuDevice;
         this._resource.unmap();
     }
 
-    public update(): void {
+    public update(gpuDevice: GPUDevice): Promise<void> {
         if (this._resource) {
-            new Float32Array(this._resource.getMappedRange()).set(this.buffer!);
-            this._resource.unmap();
+            gpuDevice!.queue.writeBuffer(this._resource, 0, this.buffer!);
         }
+        this.needsUpdate = false;
+
+        return Promise.resolve();
     }
 }
 

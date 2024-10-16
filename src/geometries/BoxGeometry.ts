@@ -1,5 +1,5 @@
 import { Geometry } from "../buffers/Geometry";
-import { Vector4 } from "../buffers/Vector4";
+import { Vector4 } from "../math/Vector4";
 
 class BoxGeometry extends Geometry {
     // buffers

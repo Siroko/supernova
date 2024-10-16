@@ -1,5 +1,5 @@
 import { vec4 } from "gl-matrix";
-import { BufferBase } from "./BufferBase";
+import { BufferBase } from "../buffers/BufferBase";
 
 class Vector4 extends BufferBase {
     public type: string = BufferBase.BUFFER_TYPE_UNIFORM;

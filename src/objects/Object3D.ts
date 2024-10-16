@@ -1,9 +1,10 @@
-import { mat4 } from "gl-matrix";
-import { Vector3 } from "../buffers/Vector3";
+import { Vector3 } from "../math/Vector3";
+import { Matrix4 } from "../math/Matrix4";
+import { UniformGroup } from "../materials/UniformGroup";
 
 class Object3D {
-    public modelMatrix: mat4;
-    public worldMatrix: mat4;
+    public modelMatrix: Matrix4;
+    public worldMatrix: Matrix4;
     public children: Object3D[] = [];
     public isMesh: boolean = false;
     public parent?: Object3D;
@@ -11,9 +12,16 @@ class Object3D {
     public rotation: Vector3 = new Vector3();
     public scale: Vector3 = new Vector3(1, 1, 1);
 
+    protected uniformGroup?: UniformGroup;
+
     constructor() {
-        this.modelMatrix = mat4.create();
-        this.worldMatrix = mat4.create();
+        this.modelMatrix = new Matrix4();
+        this.worldMatrix = new Matrix4();
+        this.setUniforms();
+    }
+
+    protected setUniforms() {
+
     }
 
     public add(object: Object3D) {
@@ -22,19 +30,29 @@ class Object3D {
     }
 
     public updateModelMatrix() {
-        mat4.fromTranslation(this.modelMatrix, this.position.toVec());
-        mat4.rotateX(this.modelMatrix, this.modelMatrix, this.rotation.x);
-        mat4.rotateY(this.modelMatrix, this.modelMatrix, this.rotation.y);
-        mat4.rotateZ(this.modelMatrix, this.modelMatrix, this.rotation.z);
-        mat4.scale(this.modelMatrix, this.modelMatrix, this.scale.toVec());
+        this.modelMatrix.fromTranslation(this.position.toVec());
+        this.modelMatrix.rotateX(this.rotation.x);
+        this.modelMatrix.rotateY(this.rotation.y);
+        this.modelMatrix.rotateZ(this.rotation.z);
+        this.modelMatrix.scale(this.scale);
+
+        this.updateWorldMatrix();
     }
 
     public updateWorldMatrix() {
         if (this.parent) {
-            mat4.mul(this.worldMatrix, this.parent.worldMatrix, this.modelMatrix);
+            this.worldMatrix.multiply(this.parent.worldMatrix, this.modelMatrix);
         } else {
-            mat4.copy(this.worldMatrix, this.modelMatrix);
+            this.worldMatrix.copy(this.modelMatrix);
         }
+    }
+
+    public async getBindGroup(gpuDevice: GPUDevice, pipeline: GPURenderPipeline, bindingGroupLayoutPosition: number = 0): Promise<GPUBindGroup> {
+        await this.uniformGroup!.getBindGroup(gpuDevice, pipeline!, bindingGroupLayoutPosition);
+        console.log('uniform group', this.uniformGroup!.bindGroup);
+        return new Promise((resolve) => {
+            resolve(this.uniformGroup!.bindGroup!);
+        });
     }
 }
 

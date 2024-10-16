@@ -74,6 +74,8 @@ class Renderer {
     }
 
     public async render(scene: Scene, camera: Camera) {
+        camera.updateViewMatrix();
+
         const commandRenderEncoder = this.device!.createCommandEncoder();
         const textureView = this.context!.getCurrentTexture().createView();
 
@@ -95,13 +97,12 @@ class Renderer {
         };
 
         for (const child of scene.children) {
-            await this.renderObject(child, commandRenderEncoder, renderPassDescriptor as GPURenderPassDescriptor);
+            await this.renderObject(child, camera, commandRenderEncoder, renderPassDescriptor as GPURenderPassDescriptor);
         }
-
         this.device!.queue.submit([commandRenderEncoder!.finish()]);
     }
 
-    private async renderObject(object: Object3D, commandRenderEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor): Promise<void> {
+    private async renderObject(object: Object3D, camera: Camera, commandRenderEncoder: GPUCommandEncoder, renderPassDescriptor: GPURenderPassDescriptor): Promise<void> {
         const passRenderEncoder = commandRenderEncoder!.beginRenderPass(renderPassDescriptor);
         if (object.isMesh) {
             const mesh = object as Mesh;
@@ -112,21 +113,29 @@ class Renderer {
                 await mesh.material.initialize(this.device!, mesh.geometry.vertexBuffersDescriptors, this.presentationFormat!);
             }
 
-            const bindGroups = await mesh.material.getBindGroups(this.device!);
+            mesh.updateModelMatrix();
+            // The bind group will always be 0 because the material is the first thing to be initialized
+            const materialBindGroup = await mesh.material.getBindGroup(this.device!);
+            // The bind group will always be 1 because the mesh is the second thing to be initialized
+            const meshBindGroup = await mesh.getBindGroup(this.device!, mesh.material.pipeline!, 1);
+            // The bind group will always be 2 because the camera is the third thing to be initialized
+            const cameraBindGroup = await camera.getBindGroup(this.device!, mesh.material.pipeline!, 2);
 
             passRenderEncoder.setPipeline(mesh.material.pipeline!);
             passRenderEncoder.setVertexBuffer(0, mesh.geometry.vertexBuffer!);
             passRenderEncoder.setIndexBuffer(mesh.geometry.indexBuffer!, 'uint16');
-            for (let i = 0; i < bindGroups.length; i++) {
-                passRenderEncoder!.setBindGroup(i, bindGroups[i]);
-            }
+
+            passRenderEncoder!.setBindGroup(0, materialBindGroup);
+            passRenderEncoder!.setBindGroup(1, meshBindGroup);
+            passRenderEncoder!.setBindGroup(2, cameraBindGroup);
+
             passRenderEncoder!.drawIndexed(mesh.geometry.vertexCount);
         }
 
         // Render children
         if (object.children.length > 0) {
             for (const child of object.children) {
-                await this.renderObject(child, commandRenderEncoder, renderPassDescriptor);
+                await this.renderObject(child, camera, commandRenderEncoder, renderPassDescriptor);
             }
         }
 

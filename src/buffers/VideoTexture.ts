@@ -5,6 +5,7 @@ class VideoTexture implements IBindable {
     private gpuDevice?: GPUDevice;
     public initialized: boolean = false;
     public needsUpdate: boolean = false;
+
     public uuid: string;
 
     constructor(
@@ -13,12 +14,13 @@ class VideoTexture implements IBindable {
         this.uuid = crypto.randomUUID();
     }
 
-    public update(gpuDevice: GPUDevice): void {
-        console.log('updating VideoTexture', gpuDevice);
+    async update(): Promise<void> {
     }
 
     get resource(): GPUBindingResource {
-        return this.gpuDevice!.importExternalTexture({ source: this.videoElement! });
+        const res = this.gpuDevice!.importExternalTexture({ source: this.videoElement! });
+        res.label = 'VideoTexture ' + this.uuid;
+        return res;
     }
     async initialize(gpuDevice: GPUDevice): Promise<void> {
         this.gpuDevice = gpuDevice;

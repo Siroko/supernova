@@ -6,7 +6,7 @@ export { Mesh } from "./objects/Mesh";
 export { Object3D } from "./objects/Object3D";
 export { Scene } from "./objects/Scene";
 export { VideoTexture } from "./buffers/VideoTexture";
-export { Vector4 } from "./buffers/Vector4";
+export { Vector4 } from "./math/Vector4";
 export { TextureLoader } from "./loaders/TextureLoader";
 export { Camera } from "./cameras/Camera";
 export { Sampler } from "./buffers/Sampler";

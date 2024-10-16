@@ -1,9 +1,9 @@
 import { vec3 } from "gl-matrix";
-import { BufferBase } from "./BufferBase";
+import { BufferBase } from "../buffers/BufferBase";
 
 class Vector3 extends BufferBase {
     public type: string = BufferBase.BUFFER_TYPE_UNIFORM;
-    private internalVec3: vec3;
+    public readonly internalVec3: vec3;
 
     constructor(x: number = 0, y: number = 0, z: number = 0) {
         super();
@@ -49,7 +49,7 @@ class Vector3 extends BufferBase {
         this.updateBuffer();
     }
 
-    public toVec3(): vec3 {
+    public toVec(): vec3 {
         return this.internalVec3;
     }
 }

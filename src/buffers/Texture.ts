@@ -15,15 +15,12 @@ class Texture implements IBindable {
         this.uuid = crypto.randomUUID();
     }
 
-    public update(gpuDevice: GPUDevice): void {
-        console.log('updating Texture', gpuDevice);
+    public async update(): Promise<void> {
     }
 
-    public initialize(gpuDevice: GPUDevice): Promise<void> {
+    public initialize(gpuDevice: GPUDevice) {
         this.texture = this.webGPUTextureFromImageBitmapOrCanvas(gpuDevice, this.imageBitmap);
         this.initialized = true;
-
-        return Promise.resolve();
     }
 
     get resource(): GPUBindingResource {
